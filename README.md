@@ -2,7 +2,7 @@
 
 Chatbot agentique construit avec **LangGraph** et **LangChain**. L'agent s'appuie sur un LLM compatible OpenAI et peut appeler des outils externes : recherche web, calculatrice, cours de bourse, météo et date/heure en temps réel.
 
-> 🚧 **Projet en cours de développement** : les outils de l'agent sont implémentés (`src/tools/tools.py`). Le graphe de l'agent, l'API et l'interface sont à venir.
+> 🚧 **Projet en cours de développement** : les outils de l'agent sont implémentés (`src/tools/tools.py`) et l'arborescence est en place. Le graphe de l'agent, le RAG, la base de données, l'API et l'interface sont à venir.
 
 ## Stack technique
 
@@ -35,15 +35,31 @@ Définis dans [src/tools/tools.py](src/tools/tools.py) avec le décorateur `@too
 
 ```text
 Agentic-chatbot-GPT/
-├── app.py              # Point d'entrée de l'application
-├── requirements.txt    # Dépendances Python
+├── app.py                  # Point d'entrée de l'application (FastAPI)
+├── requirements.txt        # Dépendances Python
 ├── src/
-│   ├── agents/         # Définition des agents et des graphes LangGraph
+│   ├── agents/
+│   │   └── agent.py        # Graphe de l'agent LangGraph
+│   ├── db/
+│   │   └── database.py     # Accès base de données (SQLAlchemy / SQLite)
+│   ├── rag/
+│   │   └── rag.py          # Ingestion de documents et recherche dans Chroma
 │   └── tools/
-│       └── tools.py    # Outils mis à disposition de l'agent
-├── .env                # Variables d'environnement (non versionné)
+│       └── tools.py        # Outils mis à disposition de l'agent
+├── templates/
+│   └── index.html          # Interface de chat (template Jinja2)
+├── .env                    # Variables d'environnement (non versionné)
 └── LICENSE
 ```
+
+| Module | État |
+| --- | --- |
+| `src/tools/tools.py` | ✅ Implémenté |
+| `src/agents/agent.py` | 🚧 À implémenter |
+| `src/rag/rag.py` | 🚧 À implémenter |
+| `src/db/database.py` | 🚧 À implémenter |
+| `templates/index.html` | 🚧 À implémenter |
+| `app.py` | 🚧 À implémenter |
 
 ## Installation
 
@@ -105,10 +121,11 @@ Le point d'entrée `app.py` n'est pas encore implémenté. Les commandes de lanc
 ## Feuille de route
 
 - [x] Outils de l'agent : recherche web, calculatrice, bourse, météo, date/heure (`src/tools`)
-- [ ] Graphe de l'agent avec LangGraph (`src/agents`)
-- [ ] Mémoire de conversation persistante (checkpoint SQLite)
-- [ ] Brique RAG : ingestion de documents PDF/DOCX dans Chroma
-- [ ] API FastAPI et interface de chat (`app.py`)
+- [x] Arborescence du projet : `agents`, `rag`, `db`, `templates`
+- [ ] Graphe de l'agent avec LangGraph (`src/agents/agent.py`)
+- [ ] Mémoire de conversation persistante : checkpoint SQLite (`src/db/database.py`)
+- [ ] Brique RAG : ingestion de documents PDF/DOCX dans Chroma (`src/rag/rag.py`)
+- [ ] API FastAPI (`app.py`) et interface de chat (`templates/index.html`)
 
 ## Licence
 
