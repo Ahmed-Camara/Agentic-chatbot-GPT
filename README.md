@@ -1,8 +1,8 @@
 # Agentic-chatbot-GPT
 
-Chatbot agentique construit avec **LangGraph** et **LangChain**. L'agent s'appuie sur un LLM compatible OpenAI et peut appeler des outils externes : recherche web, calculatrice, cours de bourse, météo et date/heure en temps réel.
+**CGPT** est un chatbot agentique inspiré de ChatGPT, construit avec **LangGraph** et **LangChain**. L'agent s'appuie sur un LLM compatible OpenAI et peut appeler des outils externes : recherche web, calculatrice, cours de bourse, météo et date/heure en temps réel.
 
-> 🚧 **Projet en cours de développement** : les outils de l'agent (`src/tools/tools.py`) et l'état du graphe (`src/states/state.py`) sont implémentés. Le graphe de l'agent est conçu (voir [Architecture](#architecture-de-lagent)) et son implémentation est en cours. Le RAG, la base de données, l'API et l'interface sont à venir.
+> 🚧 **Projet en cours de développement** : les outils de l'agent (`src/tools/tools.py`), l'état du graphe (`src/states/state.py`) et le prompt système (`src/agents/prompt.py`) sont implémentés. Le graphe de l'agent est conçu (voir [Architecture](#architecture-de-lagent)) et son implémentation est en cours. Le RAG, la base de données, l'API et l'interface sont à venir.
 
 ## Stack technique
 
@@ -30,6 +30,27 @@ Définis dans [src/tools/tools.py](src/tools/tools.py) avec le décorateur `@too
 | `get_stock_price` | Dernier cours d'une action à partir de son symbole (`AAPL`, `TSLA`…) | Alpha Vantage — `ALPHA_VANTAGE` |
 | `get_current_weather` | Météo actuelle d'une ville : conditions, température, humidité, pression, vent | OpenWeather — `OPEN_WEATHER_API_KEY` |
 | `get_datetime_information` | Date et heure actuelles, jour de la semaine, veille et lendemain (fuseau par défaut : `Africa/Abidjan`) | Aucune |
+
+Outils prévus par le prompt système, pas encore implémentés :
+
+| Outil | Description |
+| --- | --- |
+| `search_uploaded_documents` | Recherche dans les documents importés par l'utilisateur (RAG) |
+| `remember_this` | Mémorise une information importante sur l'utilisateur |
+| `recall_memory` | Retrouve les préférences et les faits mémorisés |
+
+## Prompt système
+
+Le comportement de l'assistant est défini dans [src/agents/prompt.py](src/agents/prompt.py) (`SYSTEM_PROMPT`). L'assistant s'appelle **CGPT** et suit ces règles :
+
+| Situation | Comportement attendu |
+| --- | --- |
+| Actualités, événements récents, prix actuels | Recherche web (Tavily), en précisant que la réponse s'appuie sur des résultats web |
+| Question sur un document importé | `search_uploaded_documents` |
+| « Souviens-toi de… » | `remember_this` |
+| Question sur des préférences ou des faits enregistrés | `recall_memory` |
+| Calcul mathématique | `calculator` |
+| Autres questions | Réponse directe, claire et concise |
 
 ## Architecture de l'agent
 
@@ -62,7 +83,9 @@ Agentic-chatbot-GPT/
 ├── requirements.txt        # Dépendances Python
 ├── src/
 │   ├── agents/
-│   │   └── agent.py        # Graphe de l'agent LangGraph
+│   │   ├── agent.py        # Graphe de l'agent LangGraph et configuration des modèles
+│   │   └── prompt.py       # Prompt système de l'assistant (SYSTEM_PROMPT)
+│   ├── data/               # Données locales (créé au démarrage de l'agent)
 │   ├── db/
 │   │   └── database.py     # Accès base de données (SQLAlchemy / SQLite)
 │   ├── rag/
@@ -83,7 +106,8 @@ Agentic-chatbot-GPT/
 | --- | --- |
 | `src/tools/tools.py` | ✅ Implémenté |
 | `src/states/state.py` | ✅ Implémenté |
-| `src/agents/agent.py` | 🚧 En cours (imports et configuration) |
+| `src/agents/prompt.py` | ✅ Implémenté |
+| `src/agents/agent.py` | 🚧 En cours (configuration des modèles) |
 | `src/rag/rag.py` | 🚧 À implémenter |
 | `src/db/database.py` | 🚧 À implémenter |
 | `templates/index.html` | 🚧 À implémenter |
@@ -142,9 +166,26 @@ YOU_API_KEY=            # Recherche web You.com (non utilisé pour l'instant)
 
 > ⚠️ Ne versionnez jamais le fichier `.env` : il contient vos clés d'API.
 
+### Modèles
+
+Le modèle utilisé par défaut est celui de la variable `MODEL`. Si elle n'est pas définie, `qwen3.8-max` est utilisé. Les modèles autorisés (`ALLOWED_MODELS` dans [src/agents/agent.py](src/agents/agent.py)) sont :
+
+- `qwen3.8-flash`
+- `deepseek-v4.1-flash`
+
 ## Lancement
 
-Le point d'entrée `app.py` n'est pas encore implémenté. Les commandes de lancement seront ajoutées une fois l'API FastAPI ou l'interface Streamlit en place.
+Les commandes se lancent depuis la **racine du projet**, avec l'environnement conda activé.
+
+Pour exécuter le module de l'agent, utilisez `python -m` :
+
+```bash
+python -m src.agents.agent
+```
+
+> ℹ️ `python src/agents/agent.py` échoue avec `ModuleNotFoundError: No module named 'src'` : Python ajoute alors au chemin d'import le dossier du script, et non la racine du projet.
+
+Le point d'entrée `app.py` n'est pas encore implémenté. La commande de lancement de l'application sera ajoutée une fois l'API FastAPI en place.
 
 ## Feuille de route
 
@@ -152,7 +193,10 @@ Le point d'entrée `app.py` n'est pas encore implémenté. Les commandes de lanc
 - [x] Arborescence du projet : `agents`, `rag`, `db`, `states`, `templates`
 - [x] État du graphe `ChatState` (`src/states/state.py`)
 - [x] Conception du graphe de l'agent (voir [imgs/graph.png](imgs/graph.png))
+- [x] Prompt système de l'assistant CGPT (`src/agents/prompt.py`)
 - [ ] Implémentation du graphe de l'agent avec LangGraph (`src/agents/agent.py`)
+- [ ] Outils de mémoire : `remember_this`, `recall_memory`
+- [ ] Outil RAG : `search_uploaded_documents`
 - [ ] Mémoire de conversation persistante : checkpoint SQLite (`src/db/database.py`)
 - [ ] Brique RAG : ingestion de documents PDF/DOCX dans Chroma (`src/rag/rag.py`)
 - [ ] API FastAPI (`app.py`) et interface de chat (`templates/index.html`)
