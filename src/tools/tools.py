@@ -10,19 +10,22 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 load_dotenv()
 
+CURRENT_THREAD_ID = "default"
 
 TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
-MODEL = os.getenv("MODEL")
-BASE_URL = os.getenv("BASE_URL")
-API_KEY = os.getenv("API_KEY")
 ALPHA_VANTAGE = os.getenv("ALPHA_VANTAGE")
 OPEN_WEATHER_API_KEY = os.getenv("OPEN_WEATHER_API_KEY")
 tavily = TavilyClient(api_key = TAVILY_API_KEY)
 
+
+def set_current_thread_id(thread_id: str):
+    global CURRENT_THREAD_ID
+    CURRENT_THREAD_ID = thread_id
+    
 @tool
 def web_search(query : str) -> str:
     """Search over the internet for recent and reliable information on a topic. Returns Titles, URLs, and Contents"""
-    results = tavily.search(query=query,max_results=1,search_depth="advanced",topic="general")
+    results = tavily.search(query=query,max_results=5,search_depth="advanced",topic="general")
     print(f"Search results for query : {query}")
     
     response = []

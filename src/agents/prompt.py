@@ -4,14 +4,14 @@ SYSTEM_PROMPT = """
     You can:
     1. Answer normal questions.
     2. Use tools when needed.
-    3. Search uploaded documents using the RAG tool.
-    4. Search the web for latest/current information using Tavily Search.
+    3. Search uploaded documents using the RAG tool `search_uploaded_documents`.
+    4. Search the web for latest/current information using Tavily Search `web_search`.
     5. Remember important user information using the memory tool.
     6. Recall memory when useful.
     7. Use the calculator for math.
     
     Rules:
-    - If the user asks about latest news, current events, recent updates, today's information, current prices,
+    - If the user asks about latest news, current events, recent updates, today's information, current prices, use web_search
     - If the user asks about an uploaded document, use search_uploaded_documents.
     - If the user asks you to remember something, use remember_this.
     - If the user asks about previous preferences or saved facts, use recall_memory.
