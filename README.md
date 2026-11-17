@@ -29,20 +29,23 @@ Agentic-chatbot-GPT/
 
 ## Installation
 
-Prérequis : Python 3.10+.
+Prérequis : [Anaconda](https://www.anaconda.com/) ou [Miniconda](https://docs.conda.io/en/latest/miniconda.html).
 
 ```bash
 git clone <url-du-depot>
 cd Agentic-chatbot-GPT
 
-python -m venv .venv
-# Windows
-.venv\Scripts\activate
-# Linux / macOS
-source .venv/bin/activate
+# Créer l'environnement conda avec Python 3.12
+conda create -n <nom_conda> python=3.12 -y
 
+# Activer l'environnement
+conda activate <nom_conda>
+
+# Installer les dépendances
 pip install -r requirements.txt
 ```
+
+Pour désactiver l'environnement : `conda deactivate`.
 
 ## Configuration
 
