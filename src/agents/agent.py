@@ -9,6 +9,7 @@ from langgraph.prebuilt import ToolNode, tools_condition
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langchain_openai import ChatOpenAI
 from src.tools.tools import get_current_weather
+from langchain_anthropic import ChatAnthropic
 from prompt import SYSTEM_PROMPT
 load_dotenv()
 
@@ -46,7 +47,7 @@ def build_agent(model_name: str):
     
     selected_model = normalize_model_name(model_name)
     
-    llm = ChatOpenAI(model=selected_model,
+    llm = ChatAnthropic(model=selected_model,
                      base_url=BASE_URL,temperature=0.3,streaming=True)
     
     llm_with_tools = llm.bind_tools(tools)
