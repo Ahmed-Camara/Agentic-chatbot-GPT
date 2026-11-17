@@ -8,7 +8,7 @@ from langgraph.graph import StateGraph, START,MessagesState
 from langgraph.prebuilt import ToolNode, tools_condition
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langchain_openai import ChatOpenAI
-from src.tools.tools import get_current_weather
+from src.tools.tools import web_search,calculator,get_stock_price,get_current_weather,get_datetime_information
 from langchain_anthropic import ChatAnthropic
 from prompt import SYSTEM_PROMPT
 load_dotenv()
@@ -29,7 +29,8 @@ ALLOWED_MODELS = {
     "claude-fable-5-1"
 }
 
-tools = []
+tools = [web_search,calculator,get_stock_price,get_current_weather,get_datetime_information]
+
 def normalize_model_name(model_name: str | None):
     
     if not model_name:
