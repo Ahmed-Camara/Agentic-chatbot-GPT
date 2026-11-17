@@ -21,6 +21,7 @@ Path("src/data").mkdir(exist_ok=True)
 
 DEFAULT_MODEL = os.getenv("MODEL","claude-opus-4-8")
 BASE_URL = os.getenv("BASE_URL")
+API_KEY = os.getenv("API_KEY")
 
 ALLOWED_MODELS = {
     "claude-sonnet-5",
@@ -47,7 +48,7 @@ def build_agent(model_name: str):
     
     selected_model = normalize_model_name(model_name)
     
-    llm = ChatAnthropic(model=selected_model,
+    llm = ChatAnthropic(model=selected_model,api_key=API_KEY,
                      base_url=BASE_URL,temperature=0.3,streaming=True)
     
     llm_with_tools = llm.bind_tools(tools)
