@@ -1,4 +1,5 @@
 python-dotenv
+certifi
 langchain-community
 langchain-core
 langchain-openai
@@ -12,8 +13,6 @@ langchain
 langchain-core
 langchain-text-splitters
 langgraph-checkpoint-sqlite
-langchain-chroma
-chromadb
 pypdf==6.12.2
 docx2txt==0.9
 langchain-tavily==0.2.18
