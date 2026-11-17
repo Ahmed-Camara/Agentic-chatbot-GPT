@@ -18,12 +18,13 @@ os.environ["REQUESTS_CA_BUNDLE"] = certifi.where()
 Path("src/data").mkdir(exist_ok=True)
 
 
-DEFAULT_MODEL = os.getenv("MODEL","qwen3.8-max")
+DEFAULT_MODEL = os.getenv("MODEL","claude-opus-4-8")
 BASE_URL = os.getenv("BASE_URL")
 
 ALLOWED_MODELS = {
-    "qwen3.8-flash",
-    "deepseek-v4.1-flash"
+    "claude-sonnet-5",
+    "claude-opus-5-5",
+    "claude-fable-5-1"
 }
 
 tools = []
@@ -51,5 +52,29 @@ def build_agent(model_name: str):
     llm_with_tools = llm.bind_tools(tools)
     
     def chat_node(state: MessagesState):
-        messages = [SystemMessage(content=SYSTEM_PROMPT)]
+        messages = [SystemMessage(content=SYSTEM_PROMPT)] + state["messages"]
+        
+        response = llm_with_tools.invoke(messages)
+        
+        return {
+            "messages":[response]
+        }
+    
+    tool_node = ToolNode(tools)
+    
+    graph = StateGraph(MessagesState)
+    
+    graph.add_node("chat_node",chat_node)
+    graph.add_node("tools",tool_node)
+    
+    graph.add_edge(START,"chat_node")
+    graph.add_conditional_edges("chat_node",tools_condition)
+    graph.add_edge("tools","chat_node")
+    
+    conn = sqlite3.connect("data/langgraph_checkpoints.sqlite",
+                           check_same_thread=False)
+    
+    checkpointer = SqliteSaver(conn)
+    return graph.compile(checkpointer=checkpointer)
+    
     
