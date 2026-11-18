@@ -8,6 +8,7 @@ import os
 from typing import Any
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
+from src.db.database import save_memory, search_memory
 load_dotenv()
 
 CURRENT_THREAD_ID = "default"
@@ -224,3 +225,25 @@ def get_datetime_information(
 
     except Exception as error:
         return f"Could not retrieve date and time information: {error}"
+    
+    
+@tool
+def remember_this(memory: str) -> str:
+    """
+        Save an important user preference or fact into long-term memory.
+        Use this when the user asks you to remember something
+    """
+    
+    return save_memory(thread_id=CURRENT_THREAD_ID,memory=memory)
+
+@tool
+def recall_memory(query: str) -> str:
+    """
+        Recall saved long-term memories about the user or this conversation.
+    """
+    return search_memory(thread_id=CURRENT_THREAD_ID,query=query)
+
+
+
+    
+    
