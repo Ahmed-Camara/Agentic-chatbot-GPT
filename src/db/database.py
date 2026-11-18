@@ -4,14 +4,14 @@ from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime
 from sqlalchemy.orm import declarative_base, sessionmaker
 Path("data").mkdir(exist_ok=True)
 
-DATABASE_URL="sqlite:///data/chatbot_memory.db"
+DATABASE_URL="sqlite:///src/data/chatbot_memory.db"
 
 engine = create_engine(
     DATABASE_URL,
     connect_args={"check_same_thread": False}
 )
 
-SessionLocal = sessionmaker(bind=engine,autoflush=False,autoCommit=False)
+SessionLocal = sessionmaker(bind=engine,autoflush=False,autocommit=False)
 
 Base = declarative_base()
 
@@ -29,7 +29,7 @@ class ChatMessage(Base):
     __tablename__ = "chat_messages"
     
     id = Column(Integer,primary_key=True,index=True)
-    thread_id = Column(String,unique=True,index=True)
+    thread_id = Column(String,index=True)
     role = Column(String)
     content = Column(Text)
     created_at = Column(DateTime,default=datetime.utcnow())
@@ -169,3 +169,4 @@ def search_memory(thread_id: str, query: str):
     
     finally:
         db.close()
+        

@@ -8,9 +8,9 @@ from langgraph.graph import StateGraph, START,MessagesState
 from langgraph.prebuilt import ToolNode, tools_condition
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langchain_openai import ChatOpenAI
-from src.tools.tools import web_search,calculator,get_stock_price,get_current_weather,get_datetime_information
+from src.tools.tools import Tools
 from langchain_anthropic import ChatAnthropic
-from prompt import SYSTEM_PROMPT
+from src.agents.prompt import SYSTEM_PROMPT
 load_dotenv()
 
 os.environ["SSL_CERT_FILE"] = certifi.where()
@@ -19,17 +19,17 @@ os.environ["REQUESTS_CA_BUNDLE"] = certifi.where()
 Path("src/data").mkdir(exist_ok=True)
 
 
-DEFAULT_MODEL = os.getenv("MODEL","claude-opus-4-8")
+DEFAULT_MODEL = os.getenv("MODEL","qwen3.8-flash")
 BASE_URL = os.getenv("BASE_URL")
 API_KEY = os.getenv("API_KEY")
 
 ALLOWED_MODELS = {
-    "claude-sonnet-5",
-    "claude-opus-5-5",
-    "claude-fable-5-1"
+    "qwen3.8-max",
+    "qwen3.8-flash",
+    "deepseek-v4.1-flash"
 }
 
-tools = [web_search,calculator,get_stock_price,get_current_weather,get_datetime_information]
+
 
 def normalize_model_name(model_name: str | None):
     
@@ -49,10 +49,10 @@ def build_agent(model_name: str):
     
     selected_model = normalize_model_name(model_name)
     
-    llm = ChatAnthropic(model=selected_model,api_key=API_KEY,
+    llm = ChatOpenAI(model=selected_model,api_key=API_KEY,
                      base_url=BASE_URL,temperature=0.3,streaming=True)
     
-    llm_with_tools = llm.bind_tools(tools)
+    llm_with_tools = llm.bind_tools(Tools)
     
     def chat_node(state: MessagesState):
         messages = [SystemMessage(content=SYSTEM_PROMPT)] + state["messages"]
@@ -63,7 +63,7 @@ def build_agent(model_name: str):
             "messages":[response]
         }
     
-    tool_node = ToolNode(tools)
+    tool_node = ToolNode(Tools)
     
     graph = StateGraph(MessagesState)
     
@@ -74,10 +74,26 @@ def build_agent(model_name: str):
     graph.add_conditional_edges("chat_node",tools_condition)
     graph.add_edge("tools","chat_node")
     
-    conn = sqlite3.connect("data/langgraph_checkpoints.sqlite",
+    conn = sqlite3.connect("src/data/langgraph_checkpoints.sqlite",
                            check_same_thread=False)
     
     checkpointer = SqliteSaver(conn)
     return graph.compile(checkpointer=checkpointer)
     
+    
+    
+_AGENT_CACHE = {}
+
+def get_agent(model_name: str | None = None):
+    """
+        Return cached LangGraph agent for selected model.
+        If not created yet, create it once and reuse it.
+    """
+    
+    selected_model = normalize_model_name(model_name)
+    
+    if selected_model not in _AGENT_CACHE:
+        _AGENT_CACHE[selected_model] = build_agent(selected_model)
+        
+    return _AGENT_CACHE[selected_model]
     

@@ -9,6 +9,8 @@ from typing import Any
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 from src.db.database import save_memory, search_memory
+from src.rag.rag import add_document_to_rag,retrieve_from_rag
+
 load_dotenv()
 
 CURRENT_THREAD_ID = "default"
@@ -244,6 +246,20 @@ def recall_memory(query: str) -> str:
     return search_memory(thread_id=CURRENT_THREAD_ID,query=query)
 
 
-
+@tool
+def search_uploaded_documents(query: str) -> str:
+    
+    """
+        Search uploaded documents for relevant information.
+        Use this when the user asks about uploaded PDFs, DOCX, TXT, notes, files, or documents.
+    """
+    
+    return retrieve_from_rag(
+        query=query,
+        thread_id=CURRENT_THREAD_ID
+    )
     
     
+Tools = [web_search,calculator,search_uploaded_documents,
+         get_stock_price,remember_this,recall_memory,get_current_weather,
+         get_datetime_information]
